@@ -1,0 +1,1 @@
+web: gunicorn yummy_jan.wsgi --log-file - --log-level debug

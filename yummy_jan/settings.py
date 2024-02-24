@@ -12,21 +12,24 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+from django.core.management.utils import get_random_secret_key
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+load_dotenv()
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+SECRET_KEY = os.environ.get('SECRET_KEY', get_random_secret_key())
+DEBUG = os.environ.get('DEBUG', 'False')
+ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOSTS', '*')]
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1=-1odta8ya%te8ju$8q)_5k8l8eiu75n@3pbbmza-0(1we403'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+DB_NAME = os.environ.get('DB_NAME')
+DB_USER = os.environ.get('DB_USER')
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
+DB_HOST = os.environ.get('DB_HOST')
+DB_PORT = os.environ.get('DB_PORT')
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
 
 # Application definition
@@ -58,6 +61,7 @@ CKEDITOR_CONFIGS = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -91,13 +95,23 @@ WSGI_APPLICATION = 'yummy_jan.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     }
 }
 
+import dj_database_url
+
+db_config = dj_database_url.config(default=DATABASE_URL, conn_max_age=600, conn_health_checks=True)
+
+DATABASES['default'].update(db_config)
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
